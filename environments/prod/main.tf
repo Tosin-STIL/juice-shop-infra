@@ -45,3 +45,19 @@ module "codebuild_build" {
     ECR_REPO = "590183956481.dkr.ecr.eu-west-1.amazonaws.com/juice-shop-app"
   }
 }
+
+module "codebuild_security_scan" {
+  source              = "../../modules/codebuild"
+  project             = "juice-shop"
+  build_name          = "security-scan"
+  description         = "Runs SAST, SCA, and IaC scans"
+  codebuild_role_arn  = module.iam.codebuild_role_arn
+  source_repo         = "https://github.com/YOUR_ORG/juice-shop-app.git"
+  buildspec_path      = "buildspec-security.yml"
+  environment         = "prod"
+  privileged_mode     = false
+  environment_variables = {
+    SNYK_TOKEN        = data.aws_ssm_parameter.snyk_token.value
+    SONARQUBE_TOKEN   = data.aws_ssm_parameter.sonar_token.value
+  }
+}

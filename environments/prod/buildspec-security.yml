@@ -1,0 +1,37 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 20
+      python: 3.11
+    commands:
+      - echo "Installing security tools: Checkov, Snyk, SonarScanner..."
+      - pip install checkov
+      - curl -sSL https://install.snyk.io | bash
+      - npm install -g sonarqube-scanner
+      - echo "Installed all tools."
+
+  pre_build:
+    commands:
+      - echo "🔍 Running Checkov (IaC scanning)..."
+      - checkov -d ./terraform || true
+
+      - echo "🧪 Running Snyk (SCA)..."
+      - snyk auth "${SNYK_TOKEN}"
+      - snyk test || true
+
+      - echo "🔬 Running SonarQube Scanner (SAST)..."
+      - sonar-scanner \
+          -Dsonar.projectKey=juice-shop \
+          -Dsonar.sources=. \
+          -Dsonar.host.url=http://sonarqube.${ENV}.alb.internal:9000 \
+          -Dsonar.login="${SONARQUBE_TOKEN}" || true
+
+  build:
+    commands:
+      - echo "Security scanning phase complete."
+
+artifacts:
+  files:
+    - '**/*'
