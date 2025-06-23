@@ -91,3 +91,9 @@ module "storage" {
   project     = "juice-shop"
   environment = "prod"
 }
+
+module "security" {
+  source  = "../../modules/security"
+  project = "juice-shop"
+  vpc_id  = module.vpc.vpc_id
+}
