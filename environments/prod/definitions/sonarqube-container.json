@@ -1,0 +1,35 @@
+[
+  {
+    "name": "sonarqube",
+    "image": "sonarqube:community",
+    "portMappings": [
+      {
+        "containerPort": 9000,
+        "protocol": "tcp"
+      }
+    ],
+    "essential": true,
+    "environment": [
+      {
+        "name": "SONARQUBE_JDBC_USERNAME",
+        "value": "sonar"
+      },
+      {
+        "name": "SONARQUBE_JDBC_PASSWORD",
+        "value": "sonar"
+      },
+      {
+        "name": "SONARQUBE_JDBC_URL",
+        "value": "jdbc:postgresql://dummy:5432/sonar"
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/sonarqube",
+        "awslogs-region": "eu-west-1",
+        "awslogs-stream-prefix": "ecs"
+      }
+    }
+  }
+]
