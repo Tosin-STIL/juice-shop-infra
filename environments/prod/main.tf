@@ -30,3 +30,18 @@ module "alb" {
   subnet_ids        = module.vpc.public_subnet_ids
   security_group_id = module.security.alb_sg_id
 }
+
+module "codebuild_build" {
+  source              = "../../modules/codebuild"
+  project             = "juice-shop"
+  build_name          = "build"
+  description         = "Builds Docker image and pushes to ECR"
+  codebuild_role_arn  = module.iam.codebuild_role_arn
+  source_repo         = "https://github.com/YOUR_ORG/juice-shop-app.git"
+  buildspec_path      = "buildspec.yml"
+  environment         = "prod"
+  privileged_mode     = true
+  environment_variables = {
+    ECR_REPO = "590183956481.dkr.ecr.eu-west-1.amazonaws.com/juice-shop-app"
+  }
+}
