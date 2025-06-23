@@ -61,3 +61,33 @@ module "codebuild_security_scan" {
     SONARQUBE_TOKEN   = data.aws_ssm_parameter.sonar_token.value
   }
 }
+
+data "aws_ssm_parameter" "github_token" {
+  name           = "/github/token"
+  with_decryption = true
+}
+
+module "codepipeline" {
+  source                     = "../../modules/codepipeline"
+  project                    = "juice-shop"
+  environment                = "prod"
+  pipeline_role_arn          = module.iam.codepipeline_role_arn
+  artifact_bucket            = module.storage.artifact_bucket_name
+  github_owner               = "YOUR_GITHUB_USERNAME"
+  github_repo                = "juice-shop-app"
+  github_branch              = "main"
+  github_token               = data.aws_ssm_parameter.github_token.value
+  build_project_name         = module.codebuild_build.project_name
+  security_scan_project_name = module.codebuild_security_scan.project_name
+}
+
+module "iam" {
+  source  = "../../modules/iam"
+  project = "juice-shop"
+}
+
+module "storage" {
+  source      = "../../modules/storage"
+  project     = "juice-shop"
+  environment = "prod"
+}
