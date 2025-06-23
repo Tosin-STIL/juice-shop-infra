@@ -42,7 +42,7 @@ module "codebuild_build" {
   environment         = "prod"
   privileged_mode     = true
   environment_variables = {
-    ECR_REPO = "590183956481.dkr.ecr.eu-west-1.amazonaws.com/juice-shop-app"
+    ECR_REPO = module.ecr.repository_url
   }
 }
 
@@ -96,4 +96,29 @@ module "security" {
   source  = "../../modules/security"
   project = "juice-shop"
   vpc_id  = module.vpc.vpc_id
+}
+
+module "ecr" {
+  source      = "../../modules/ecr"
+  project     = "juice-shop"
+  environment = "prod"
+  repo_name   = "juice-shop-app"
+}
+
+module "ecs_sonarqube" {
+  source                = "../../modules/ecs"
+  project               = "juice-shop"
+  service_name          = "sonarqube"
+  task_family           = "sonarqube-task"
+  container_name        = "sonarqube"
+  container_port        = 9000
+  cpu                   = "1024"
+  memory                = "2048"
+  desired_count         = 1
+  execution_role_arn    = module.iam.execution_role_arn
+  task_role_arn         = module.iam.task_role_arn
+  subnet_ids            = module.vpc.public_subnet_ids
+  security_group_ids    = [module.security.ecs_sg_id]
+  target_group_arn      = module.alb.sonarqube_tg_arn
+  container_definitions = file("${path.module}/definitions/sonarqube-container.json")
 }
