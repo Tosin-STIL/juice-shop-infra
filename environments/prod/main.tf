@@ -20,7 +20,7 @@ module "ecs_juice_shop" {
   subnet_ids            = module.vpc.public_subnet_ids
   security_group_ids    = [module.security.ecs_sg_id]
   target_group_arn      = module.alb.juice_shop_tg_arn
-  container_definitions = file("${path.module}/definitions/juice-shop-container.json")
+  container_definitions = "${path.module}/definitions/juice-shop-container.json"
 }
 
 module "alb" {
@@ -46,6 +46,22 @@ module "codebuild_build" {
   }
 }
 
+data "aws_ssm_parameter" "github_token" {
+  name            = "/sovtech/GITHUB_DEPLOY_TOKEN"
+  with_decryption = true
+}
+
+data "aws_ssm_parameter" "snyk_token" {
+  name           = "/sovtech/SNYK_TOKEN"
+  with_decryption = true
+}
+
+data "aws_ssm_parameter" "sonar_token" {
+  name           = "/sovtech/SONARQUBE_TOKEN"
+  with_decryption = true
+}
+
+
 module "codebuild_security_scan" {
   source              = "../../modules/codebuild"
   project             = "juice-shop"
@@ -62,24 +78,20 @@ module "codebuild_security_scan" {
   }
 }
 
-data "aws_ssm_parameter" "github_token" {
-  name           = "/github/token"
-  with_decryption = true
-}
-
 module "codepipeline" {
   source                     = "../../modules/codepipeline"
   project                    = "juice-shop"
   environment                = "prod"
   pipeline_role_arn          = module.iam.codepipeline_role_arn
   artifact_bucket            = module.storage.artifact_bucket_name
-  github_owner               = "YOUR_GITHUB_USERNAME"
+  github_owner               = "Tosin-STIL"
   github_repo                = "juice-shop-app"
   github_branch              = "main"
-  github_token               = data.aws_ssm_parameter.github_token.value
+  codestar_connection_arn    = "arn:aws:codeconnections:eu-west-1:590183956481:connection/8266d7de-ec49-4c52-a029-15ab5e920ca1"
   build_project_name         = module.codebuild_build.project_name
   security_scan_project_name = module.codebuild_security_scan.project_name
 }
+
 
 module "iam" {
   source  = "../../modules/iam"
@@ -120,5 +132,9 @@ module "ecs_sonarqube" {
   subnet_ids            = module.vpc.public_subnet_ids
   security_group_ids    = [module.security.ecs_sg_id]
   target_group_arn      = module.alb.sonarqube_tg_arn
-  container_definitions = file("${path.module}/definitions/sonarqube-container.json")
+  container_definitions = "${path.module}/definitions/sonarqube-container.json"
+}
+
+data "aws_codestarconnections_connection" "github" {
+  name = "juice-shop-github-connection"
 }

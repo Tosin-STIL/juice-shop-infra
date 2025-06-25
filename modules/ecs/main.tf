@@ -15,7 +15,8 @@ resource "aws_ecs_task_definition" "this" {
   execution_role_arn       = var.execution_role_arn
   task_role_arn            = var.task_role_arn
 
-  container_definitions = var.container_definitions
+  # This will load the JSON content as a string (already pre-processed from definition file)
+  container_definitions = file(var.container_definitions)
 
   tags = {
     Name = "${var.project}-${var.service_name}-task"
@@ -30,9 +31,9 @@ resource "aws_ecs_service" "this" {
   desired_count   = var.desired_count
 
   network_configuration {
-    subnets         = var.subnet_ids
+    subnets          = var.subnet_ids
     assign_public_ip = true
-    security_groups = var.security_group_ids
+    security_groups  = var.security_group_ids
   }
 
   load_balancer {

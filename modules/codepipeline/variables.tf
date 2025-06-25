@@ -34,12 +34,6 @@ variable "github_branch" {
   default     = "main"
 }
 
-variable "github_token" {
-  description = "GitHub OAuth token (use SSM for secure handling)"
-  type        = string
-  sensitive   = true
-}
-
 variable "build_project_name" {
   description = "Name of the CodeBuild project for Docker build"
   type        = string
@@ -47,5 +41,10 @@ variable "build_project_name" {
 
 variable "security_scan_project_name" {
   description = "Name of the CodeBuild project for SAST/SCA/IaC scans"
+  type        = string
+}
+
+variable "codestar_connection_arn" {
+  description = "ARN of the CodeStar GitHub connection"
   type        = string
 }
