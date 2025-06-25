@@ -6,6 +6,21 @@ resource "aws_ecs_cluster" "this" {
   }
 }
 
+resource "aws_cloudwatch_log_group" "this" {
+  name              = "/ecs/${var.project}-${var.service_name}"
+  retention_in_days = 14
+
+  tags = {
+    Name = "${var.project}-${var.service_name}-logs"
+  }
+
+  lifecycle {
+    create_before_destroy = false
+    prevent_destroy       = true
+    ignore_changes        = [tags]
+  }
+}
+
 resource "aws_ecs_task_definition" "this" {
   family                   = var.task_family
   requires_compatibilities = ["FARGATE"]
@@ -15,7 +30,6 @@ resource "aws_ecs_task_definition" "this" {
   execution_role_arn       = var.execution_role_arn
   task_role_arn            = var.task_role_arn
 
-  # This will load the JSON content as a string (already pre-processed from definition file)
   container_definitions = file(var.container_definitions)
 
   tags = {
@@ -42,9 +56,23 @@ resource "aws_ecs_service" "this" {
     container_port   = var.container_port
   }
 
-  depends_on = [aws_ecs_task_definition.this]
+  depends_on = [
+    aws_ecs_task_definition.this,
+    aws_cloudwatch_log_group.ecs_logs
+  ]
 
   tags = {
     Name = "${var.project}-${var.service_name}-service"
+  }
+}
+
+resource "aws_cloudwatch_log_group" "ecs_logs" {
+  name              = "/ecs/${var.project}-${var.service_name}"
+  retention_in_days = 7
+
+  tags = {
+    Name        = "/ecs/${var.project}-${var.service_name}"
+    Environment = var.environment
+    Project     = var.project
   }
 }

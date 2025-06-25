@@ -21,6 +21,7 @@ module "ecs_juice_shop" {
   security_group_ids    = [module.security.ecs_sg_id]
   target_group_arn      = module.alb.juice_shop_tg_arn
   container_definitions = "${path.module}/definitions/juice-shop-container.json"
+  environment           = "prod" 
 }
 
 module "alb" {
@@ -37,7 +38,7 @@ module "codebuild_build" {
   build_name          = "build"
   description         = "Builds Docker image and pushes to ECR"
   codebuild_role_arn  = module.iam.codebuild_role_arn
-  source_repo         = "https://github.com/YOUR_ORG/juice-shop-app.git"
+  source_repo         = "https://github.com/Tosin-STIL/juice-shop-app.git"
   buildspec_path      = "buildspec.yml"
   environment         = "prod"
   privileged_mode     = true
@@ -68,7 +69,7 @@ module "codebuild_security_scan" {
   build_name          = "security-scan"
   description         = "Runs SAST, SCA, and IaC scans"
   codebuild_role_arn  = module.iam.codebuild_role_arn
-  source_repo         = "https://github.com/YOUR_ORG/juice-shop-app.git"
+  source_repo         = "https://github.com/Tosin-STIL/juice-shop-app.git"
   buildspec_path      = "buildspec-security.yml"
   environment         = "prod"
   privileged_mode     = false
@@ -133,6 +134,7 @@ module "ecs_sonarqube" {
   security_group_ids    = [module.security.ecs_sg_id]
   target_group_arn      = module.alb.sonarqube_tg_arn
   container_definitions = "${path.module}/definitions/sonarqube-container.json"
+  environment           = "prod" 
 }
 
 data "aws_codestarconnections_connection" "github" {

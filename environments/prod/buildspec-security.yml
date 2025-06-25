@@ -25,12 +25,12 @@ phases:
       - sonar-scanner \
           -Dsonar.projectKey=juice-shop \
           -Dsonar.sources=. \
-          -Dsonar.host.url=http://sonarqube.${ENV}.alb.internal:9000 \
+          -Dsonar.host.url=http://juice-shop-alb-649155672.eu-west-1.elb.amazonaws.com \
           -Dsonar.login="${SONARQUBE_TOKEN}" || true
 
   build:
     commands:
-      - echo "Security scanning phase complete."
+      - echo "✅ Security scanning phase complete."
 
 artifacts:
   files:

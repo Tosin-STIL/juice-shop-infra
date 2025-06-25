@@ -5,6 +5,7 @@
     "portMappings": [
       {
         "containerPort": 9000,
+        "hostPort": 9000,
         "protocol": "tcp"
       }
     ],
@@ -26,7 +27,7 @@
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-group": "/ecs/sonarqube",
+        "awslogs-group": "/ecs/juice-shop-sonarqube",
         "awslogs-region": "eu-west-1",
         "awslogs-stream-prefix": "ecs"
       }

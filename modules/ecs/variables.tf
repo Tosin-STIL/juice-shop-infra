@@ -70,3 +70,8 @@ variable "container_definitions" {
   description = "Full JSON of container definitions"
   type        = string
 }
+
+variable "environment" {
+  description = "Environment name (e.g., prod, dev)"
+  type        = string
+}

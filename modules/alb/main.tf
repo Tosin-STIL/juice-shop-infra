@@ -33,6 +33,7 @@ resource "aws_lb_target_group" "juice_shop" {
   }
 }
 
+
 resource "aws_lb_target_group" "sonarqube" {
   name        = "${var.project}-sonar-tg"
   port        = 9000
@@ -97,7 +98,7 @@ resource "aws_lb_listener_rule" "sonarqube" {
 
   condition {
     path_pattern {
-      values = ["/sonarqube*", "/sonarqube"]
+      values = ["/*"]
     }
   }
 }
